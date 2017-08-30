@@ -1,10 +1,3 @@
-// Last time updated: 2017-08-20 8:07:58 AM UTC
-
-// _______________
-// Canvas-Designer
-
-// https://github.com/muaz-khan/Canvas-Designer
-
 'use strict';
 
 (function() {

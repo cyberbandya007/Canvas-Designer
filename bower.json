@@ -3,15 +3,15 @@
   "preferGlobal": false,
   "version": "1.2.1",
   "author": {
-    "name": "Muaz Khan",
-    "email": "muazkh@gmail.com",
-    "url": "http://www.muazkhan.com/"
+    "name": "Sandeep",
+    "email": "sandeep.coherent@gmail.com",
+    "url": "http://www.coherentbs.com/"
   },
   "description": "Collaborative, extendable, JavaScript Canvas2D drawing tool, supporting dozens of builtin tools.",
   "main": "server.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/muaz-khan/Canvas-Designer.git"
+    "url": "https://github.com/cyberbandya007/Canvas-Designer"
   },
   "keywords": [
     "canvas-designer",
@@ -19,17 +19,9 @@
     "tool",
     "canvas2d",
     "javascript",
-    "muaz",
-    "muaz-khan"
   ],
   "analyze": false,
-  "license": "MIT",
-  "readmeFilename": "README.md",
-  "bugs": {
-    "url": "https://github.com/muaz-khan/Canvas-Designer/issues",
-    "email": "muazkh@gmail.com"
-  },
-  "homepage": "https://www.webrtc-experiment.com/Canvas-Designer/",
+  "homepage": "https://www.coherentbs.com/Canvas-Designer/",
   "ignore": [
         "**/.*",
         "node_modules"
