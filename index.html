@@ -168,8 +168,12 @@ div#comments-popup {
 }
 </style>
 
-<div id="widget-container" style="position: fixed;bottom: 0;right: 0%;left: 0%;height: 100%;border: 1px solid black; border-top:0; border-bottom: 0;"></div>
-
+<div id="widget-container" style="position: fixed;bottom: 0;right: 0%;left: 0%;height: 100%;border: 1px solid black; border-top:0; border-bottom: 0;">
+</div>
+<div id="video_hidden_container" style="display: none;">
+<video controls="" style="display: none;"></video>
+<input type="text" id="room-id" placeholder="room-id">
+</div>
 <div id="fade" class="black_overlay"></div>
 
 <div class="extra-controls">
@@ -227,27 +231,6 @@ div#comments-popup {
     </section>
 </div>
 <script>
-document.getElementById('room-id').onkeyup = document.getElementById('room-id').onblur = function() {
-    localStorage.setItem('canvas-designer-roomid', this.value);
-};
-
-if(localStorage.getItem('canvas-designer-roomid')) {
-    document.getElementById('room-id').value = localStorage.getItem('canvas-designer-roomid');
-}
-
-document.getElementById('open-room').onclick = function() {
-    var roomid = document.getElementById('room-id').value;
-    if(!roomid.length) return alert('Please enter roomid.');
-
-    this.disabled = true;
-
-    connection.open(roomid, onOpenRoom);
-
-    this.parentNode.innerHTML = '<a href="#' + roomid + '" target="_blank">Please share this link</a>';
-};
-</script>
-
-<script>
 var designer = new CanvasDesigner();
 
 // you can place widget.html anywhere
@@ -278,25 +261,6 @@ designer.setTools({
 });
 
 designer.appendTo(document.getElementById('widget-container'));
-
-Array.prototype.slice.call(document.getElementById('action-controls').querySelectorAll('input[type=checkbox]')).forEach(function(checkbox) {
-    checkbox.onchange = function() {
-        designer.destroy();
-
-        designer.addSyncListener(function(data) {
-            connection.send(data);
-        });
-
-        var tools = {};
-        Array.prototype.slice.call(document.getElementById('action-controls').querySelectorAll('input[type=checkbox]')).forEach(function(checkbox2) {
-            if(checkbox2.checked) {
-                tools[checkbox2.id] = true;
-            }
-        });
-        designer.setTools(tools);
-        designer.appendTo(document.getElementById('widget-container'));
-    };
-});
 
 var undoOptions = document.getElementById('undo-options');
 
@@ -423,7 +387,6 @@ function showCommentsPopup(e) {
 	document.getElementById('comments-popup').style.display='block';
 	document.getElementById('fade').style.display='block';
 }
-document.getElementById('btn-comments').onclick = showCommentsPopup;
 if(location.hash.length && location.hash.indexOf('comment') !== -1) {
 	showCommentsPopup();
 }
@@ -434,6 +397,23 @@ if(location.hash.length && location.hash.indexOf('comment') !== -1) {
 
 <script>
 var connection = new RTCMultiConnection();
+
+function onOpenRoom() {
+    if (connection.isInitiator === true) {
+        // you opened the room
+    } else {
+        // you joined it
+    }
+    // capture canvas-2d stream
+    // and share in realtime using RTCPeerConnection.addStream
+    // requires: dev/webrtc-handler.js
+    designer.captureStream(function(stream) {
+        connection.attachStreams = [stream];
+        connection.onstream({
+            stream: stream
+        });
+    });
+}
 
 connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 connection.socketMessageEvent = 'canvas-designer';
@@ -451,26 +431,26 @@ connection.sdpConstraints.mandatory = {
 connection.dontCaptureUserMedia = true;
 if(location.hash.replace('#', '').length) {
     var roomid = location.hash.replace('#', '');
-    connection.join(roomid);
+    connection.openOrJoin(roomid, onOpenRoom);
 }
 
 connection.onUserStatusChanged = function(event) {
-    var infoBar = document.getElementById('hide-on-datachannel-opened');
+    // var infoBar = document.getElementById('hide-on-datachannel-opened');
     if(event.status == 'online') {
-        infoBar.innerHTML = event.userid + ' is <b>online</b>.';
+        // infoBar.innerHTML = event.userid + ' is <b>online</b>.';
     }
 
     if(event.status == 'offline') {
-        infoBar.innerHTML = event.userid + ' is <b>offline</b>.';
+        // infoBar.innerHTML = event.userid + ' is <b>offline</b>.';
     }
 
-    numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
+    // numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
 };
 
-var numberOfConnectedUsers = document.getElementById('number-of-connected-users');
+// var numberOfConnectedUsers = document.getElementById('number-of-connected-users');
 connection.onopen = function(event) {
-    var infoBar = document.getElementById('hide-on-datachannel-opened');
-    infoBar.innerHTML = '<b>' + event.userid + '</b> is ready to collaborate with you.';
+    // var infoBar = document.getElementById('hide-on-datachannel-opened');
+    // infoBar.innerHTML = '<b>' + event.userid + '</b> is ready to collaborate with you.';
 
     if(designer.pointsLength <= 0) {
         // make sure that remote user gets all drawings synced.
@@ -479,11 +459,11 @@ connection.onopen = function(event) {
         }, 1000);
     }
 
-    numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
+    // numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
 };
 
 connection.onclose = connection.onerror = connection.onleave = function() {
-    numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
+    // numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
 };
 
 connection.onmessage = function(event) {
@@ -498,17 +478,6 @@ connection.onmessage = function(event) {
 
 <script src="dev/webrtc-handler.js"></script>
 <script>
-function onOpenRoom() {
-    // capture canvas-2d stream
-    // and share in realtime using RTCPeerConnection.addStream
-    // requires: dev/webrtc-handler.js
-    designer.captureStream(function(stream) {
-        connection.attachStreams = [stream];
-        connection.onstream({
-            stream: stream
-        });
-    });
-}
 
 var video = document.querySelector('video');
 
